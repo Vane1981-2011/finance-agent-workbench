@@ -1,3 +1,3 @@
 User-agent: *
-Allow: /
-Sitemap: https://vane1981-2011.github.io/finance-agent-workbench/sitemap.xml
+Disallow: /
+Allow: /finance/
