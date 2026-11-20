@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>九科图谱 · 高中错题知识库</title>
+<title>九科图谱 · 高中错题知识库（校内试用分享版）</title>
+<meta name="robots" content="noindex,nofollow">
 <style>
 :root{
   --bg:#f4f3ee; --surface:#fff; --surface-2:#faf9f5; --surface-3:#f1f0ea;
@@ -1236,6 +1237,10 @@ body.ait-lock{overflow:hidden}
 .ait-hintline{font-size:9px;color:#a0a596;line-height:1.65;margin-top:5px}
 .ait-hintline.warn{color:#a4695f}
 .ait-hintline.err{color:var(--danger)}
+.ait-hintline.ok{color:#2f7d5f}
+.ait-modelpicks{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ait-modelpicks button{font-size:10px;padding:3px 8px;border-radius:999px;border:1px dashed #cfd8c9;background:#f7f9f4;color:#4c6b52;cursor:pointer;font-family:inherit}
+.ait-modelpicks button:hover{background:#eef4ea;border-color:#b9c9b2;color:#136b4f}
 .ait-tpl{width:100%;min-height:104px;resize:vertical;border:1px solid #e3e0d5;background:#fbfaf6;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.65;font-family:inherit;outline:0;margin-top:8px}
 .ait-tpl:focus{border-color:#a9cbbb;background:#fff;box-shadow:0 0 0 3px rgba(23,105,79,.07)}
 .ait-tplvars{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
@@ -1360,6 +1365,13 @@ body.ait-lock{overflow:hidden}
     </div>
   </div>
 </header>
+<div class="share-bar" id="shareBar">
+  <b>校内试用分享版</b>
+  <span>无需登录，数据只保存在本机浏览器；点右上角头像可随时切换使用者。</span>
+  <button class="sb-act" data-act="copyShareLink">复制链接</button>
+  <button class="sb-act" data-act="openProfile">设置我的身份</button>
+  <button class="sb-x" data-act="closeShareBar" aria-label="关闭提示">×</button>
+</div>
 
 <div class="app">
   <aside class="col left">
@@ -1591,7 +1603,10 @@ body.ait-lock{overflow:hidden}
       </div>
       <div class="ait-field">
         <label>模型</label>
-        <input class="input" id="aiModel" placeholder="deepseek-chat" autocomplete="off">
+        <input class="input" id="aiModel" placeholder="deepseek-chat" autocomplete="off" list="aiModelList" spellcheck="false">
+        <datalist id="aiModelList"></datalist>
+        <div class="ait-modelpicks" id="aiModelPick" hidden></div>
+        <div class="ait-hintline" id="aiModelHint"></div>
       </div>
       <div class="ait-field" id="aiKeyField">
         <label>API Key</label>
@@ -1634,6 +1649,7 @@ body.ait-lock{overflow:hidden}
         <button class="btn soft" id="aiTestBtn" type="button">测试连接</button>
         <button class="btn primary" id="aiSaveBtn" type="button">保存设置</button>
       </div>
+      <div class="ait-hintline" id="aiTestMsg" role="status" aria-live="polite"></div>
       <div class="ait-settings-extra">
         <button class="ait-link" id="aiClearAll" type="button">清空全部对话</button>
       </div>
@@ -1666,423 +1682,7 @@ body.ait-lock{overflow:hidden}
 /* CATALOG_DATA_START */
 const CATALOG_DATA = {"meta":{"version":"2026.11-qd","name":"高中九科教材目录库（青岛常规版）","edition":"青岛市 2026-2027 学年普通高中教学用书（常规班）","basis":"普通高中课程标准（2017年版2020年修订）","editionSource":"青岛市 2026-2027 学年普通高中教育教学用书目录（附件 2）","editionSourceUrl":"https://www.xihaian.gov.cn/zwgk/bmgk/jyty/gkml/gsgg/202609/P020260702490965049785.pdf","editionChecked":"2026-11-19","note":"版本按青岛市 2026-2027 学年普通高中教学用书目录（常规班）标注；九科 50 册 / 241 章 / 1189 个核心考点。英语、化学、地理章节取自国家中小学智慧教育平台官方教材目录树；其余六科按对应版本教材章节与课程标准整理，考点为教研归纳。目录用于错题分类，均以本校教研组核对为准。","updated":"2026-11-19","points":1189,"alignedSubjects":9},"subjects":{"语文":{"color":"#C96050","edition":{"version":"统编版","short":"统编","press":"人民教育出版社","scope":"必修上、下册；选择性必修上、中、下册","aligned":true},"books":[["必修上册",[["现代诗歌鉴赏",["意象与意境","诗歌语言与节奏","情感主题分析","现代诗歌写作"]],["新闻通讯阅读",["新闻事实与立场","通讯结构与选材","新闻语言特点","新闻短评写作"]],["古诗词鉴赏",["诗歌意象与意境","表达技巧","思想感情","名句默写"]],["家乡文化生活调查",["调查方法","访谈记录","调查报告写作","文化现象分析"]],["整本书阅读《乡土中国》",["核心概念理解","章节脉络梳理","学术著作阅读方法","概念迁移运用"]],["议论性文章阅读",["论点与论据","论证方法","论证结构","议论性写作"]],["写景散文鉴赏",["写景角度","修辞与语言","情景关系","散文写作"]],["词语积累与词语解释",["词语辨析","成语运用","语境义判断","病句修改"]]]],["必修下册",[["先秦诸子散文",["文言实词","虚词与句式","观点理解","文化经典阅读"]],["史传文学",["史传叙事","人物形象","文言翻译","史实评价"]],["戏剧鉴赏",["戏剧冲突","人物台词","舞台说明","戏剧评论"]],["科学文化论著",["概念理解","论证逻辑","信息筛选","科学表达"]],["媒介信息阅读",["信息来源辨识","新闻立场分析","媒介表达","信息类写作"]],["书信与演讲",["书信格式","演讲词特点","对象意识","应用写作"]],["小说鉴赏",["人物形象","情节结构","环境描写","叙事视角"]],["整本书阅读《红楼梦》",["人物关系","情节主线","主题探究","整本书阅读方法"]]]],["选择性必修上册",[["中国革命传统作品（纪实）",["纪实作品特征","人物精神","主题理解","评论写作"]],["先秦诸子（经典研读）",["文言实词虚词","思想观点","论证方法","文化传承"]],["外国小说",["叙事视角","人物与主题","环境描写","比较阅读"]],["逻辑的力量",["概念与判断","推理形式","逻辑谬误","论证有效性"]]]],["选择性必修中册",[["社会科学论文",["概念界定","论证结构","材料与观点","学术表达"]],["中国革命传统作品（诗歌散文）",["意象与情感","表现手法","时代精神","文学评论"]],["史传与纪实",["史料辨析","叙事特点","人物评价","文言翻译"]],["外国戏剧",["戏剧冲突","人物塑造","主题理解","戏剧评论"]]]],["选择性必修下册",[["古代诗词",["意象意境","表达技巧","思想感情","名句默写"]],["现当代小说与散文",["人物与情节","散文语言","主题探究","比较阅读"]],["古代散文",["文言实词","虚词句式","文言翻译","思想内容"]],["语言运用",["成语病句","语句衔接","修辞运用","情境写作"]]]]]},"数学":{"color":"#4C6FE0","edition":{"version":"人教A版","short":"人教A","press":"人民教育出版社","scope":"必修第一、二册；选择性必修1–3","aligned":true},"books":[["必修第一册",[["集合与常用逻辑用语",["集合的概念与表示","集合间的基本关系","集合的基本运算","充分条件与必要条件","全称量词与存在量词"]],["一元二次函数、方程和不等式",["不等式性质","基本不等式","一元二次不等式","二次函数与方程"]],["函数的概念与性质",["函数概念与表示","定义域与值域","函数的单调性","函数的奇偶性","幂函数"]],["指数函数与对数函数",["指数运算","指数函数","对数运算","对数函数","函数零点与二分法"]],["三角函数",["任意角与弧度制","三角函数定义与诱导公式","三角函数图象与性质","三角恒等变换","函数y=Asin(ωx+φ)"]]]],["必修第二册",[["平面向量及其应用",["向量的概念与运算","向量的数量积","向量基本定理与坐标表示","正弦定理与余弦定理"]],["复数",["复数的概念与几何意义","复数的四则运算","复数与方程","共轭复数与复数的模","复数范围内解一元二次方程"]],["立体几何初步",["空间几何体与表面积体积","点线面位置关系","平行与垂直的判定","空间角"]],["统计",["抽样方法","统计图表","样本估计总体","百分位数"]],["概率",["随机事件与概率","古典概型","事件的独立性","互斥事件与对立事件","概率的基本性质"]]]],["选择性必修第一册",[["空间向量与立体几何",["空间向量的运算","空间直角坐标系","法向量与空间角","空间距离"]],["直线和圆的方程",["直线的方程","两直线位置关系","圆的方程","直线与圆的位置关系"]],["圆锥曲线的方程",["椭圆","双曲线","抛物线","直线与圆锥曲线"]]]],["选择性必修第二册",[["数列",["数列的概念","等差数列","等比数列","数列求和","递推数列"]],["一元函数的导数及其应用",["导数概念与运算","导数的几何意义","利用导数研究单调性","极值与最值","导数在实际问题中的应用"]]]],["选择性必修第三册",[["计数原理",["分类加法与分步乘法","排列","组合","二项式定理"]],["随机变量及其分布",["条件概率","离散型随机变量的分布列","二项分布与超几何分布","正态分布","期望与方差"]],["成对数据的统计分析",["相关关系","回归直线方程","独立性检验","散点图与相关性判断","2×2 列联表"]]]]]},"英语":{"color":"#7C5CE0","edition":{"version":"外研版","short":"外研","press":"外语教学与研究出版社","scope":"必修1–3；选择性必修1–4","aligned":true,"note":"章节按外研版官方目录（Unit 话题）录入；知识点为官方教学环节（Starting out / Understanding ideas / Using language / Developing ideas / Presenting ideas），属学习环节而非教材逐字考点。"},"books":[["必修第一册",[["Unit 1 A new start",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 Exploring English",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 Family matters",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 Friends forever",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 Into the wild",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 At one with nature",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]],["必修第二册",[["Unit 1 Food for thought",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 Let's celebrate!",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 On the move",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 Stage and screen",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 On the road",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 Earth first",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]],["必修第三册",[["Unit 1 Knowing me, knowing you",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 Making a difference",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 The world of science",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 Amazing art",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 What an adventure!",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 Disaster and hope",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (词汇+听说)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]],["选择性必修第一册",[["Unit 1 Laugh out loud!",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 Onwards and upwards",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 Faster,higher,stronger",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 Meeting the muse",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 Revealing nature",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 Nurturing nature",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]],["选择性必修第二册",[["Unit 1 Growing up",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 Improving yourself",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 Times change!",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 Breaking boundaries",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 A delicate world",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 Survival",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]],["选择性必修第三册",[["Unit 1 Face values",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 A life's work",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 War and peace",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 A glimpse of the future",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 Learning from nature",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 Nature in words",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]],["选择性必修第四册",[["Unit 1 Looking forwards",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 2 Lessons in life",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 3 The world meets China",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 4 Everyday economics",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 5 Into the unknown",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]],["Unit 6 Space and beyond",["Starting out & Understanding ideas (文本解读)","Understanding ideas (语言学习) & Using language (语法)","Using language (综合语言运用)","Developing ideas (文本解读)","Developing ideas (写作)","Presenting ideas & Reflection & Project"]]]]]},"物理":{"color":"#1B9C99","edition":{"version":"人教版","short":"人教","press":"人民教育出版社","scope":"必修1–3；选择性必修1–3","aligned":true},"books":[["必修第一册",[["运动的描述",["质点与参考系","位移与路程","速度与加速度","运动图象"]],["匀变速直线运动",["匀变速直线运动规律","自由落体运动","实验：研究匀变速直线运动","速度—时间图象","追及与相遇问题"]],["相互作用——力",["重力与弹力","摩擦力","力的合成与分解","共点力平衡"]],["运动和力的关系",["牛顿第一定律","牛顿第二定律","牛顿第三定律","超重与失重","连接体问题"]]]],["必修第二册",[["抛体运动",["运动的合成与分解","平抛运动","斜抛运动","平抛运动的推论","实验：探究平抛运动的特点"]],["圆周运动",["圆周运动描述","向心力与向心加速度","生活中的圆周运动","传动装置模型","竖直平面内圆周运动的临界问题"]],["万有引力与宇宙航行",["万有引力定律","天体运动与卫星","宇宙速度","卫星变轨与追及相遇","双星与多星模型"]],["机械能守恒定律",["功与功率","动能定理","重力势能与弹性势能","机械能守恒定律"]]]],["必修第三册",[["静电场及其应用",["电荷与库仑定律","电场强度","电场线","静电屏蔽与静电利用"]],["静电场中的能量",["电势能与电势","电势差","电容器","带电粒子在电场中的运动"]],["电路及其应用",["电流与电阻","串联与并联电路","电功与电功率","实验：测量电阻"]],["电能 能量守恒定律",["电源与电动势","闭合电路欧姆定律","电学实验与误差分析","能量守恒"]],["电磁感应与电磁波初步",["磁场与磁感线","电磁感应现象","电磁波","感应电流的产生条件","电磁波的应用与信息传递"]]]],["选择性必修第一册",[["动量守恒定律",["动量与冲量","动量定理","动量守恒定律","碰撞与反冲"]],["机械振动",["简谐运动","单摆","受迫振动与共振","简谐运动的图象与能量","实验：用单摆测重力加速度"]],["机械波",["波的形成与传播","波的图象","波的干涉与衍射","多普勒效应"]],["光",["光的折射与全反射","光的干涉","光的衍射与偏振","实验：测量玻璃折射率"]]]],["选择性必修第二册",[["安培力与洛伦兹力",["磁场对通电导线的作用","洛伦兹力","带电粒子在磁场中的运动","复合场问题"]],["电磁感应",["楞次定律","法拉第电磁感应定律","电磁感应中的电路与能量","自感与互感"]],["交变电流",["交变电流的产生与描述","变压器","远距离输电","交变电流的有效值","电感与电容对交变电流的影响"]],["电磁振荡与电磁波",["电磁振荡","电磁波的产生与传播","电磁波谱","电磁波的发射与接收","电磁波的应用与防护"]],["传感器",["常见传感器","传感器的应用","光敏电阻与热敏电阻","霍尔元件"]]]],["选择性必修第三册",[["分子动理论",["分子动理论","内能","实验：用油膜法估测分子直径","布朗运动","分子间作用力"]],["气体、固体和液体",["气体实验定律","理想气体状态方程","固体与液体","气体压强的微观解释","晶体与非晶体","液体表面张力"]],["热力学定律",["热力学第一定律","热力学第二定律","能量守恒与熵","理想气体状态变化中的做功与热传递","能量耗散与方向性"]],["原子结构和波粒二象性",["光电效应","波粒二象性","原子结构模型","氢原子光谱"]],["原子核",["原子核的组成","放射性衰变","核反应与核能","半衰期","结合能与质量亏损","核裂变与核聚变"]]]]]},"化学":{"color":"#C98426","edition":{"version":"鲁科版","short":"鲁科","press":"山东科学技术出版社","scope":"必修第一、二册；选择性必修1–3","aligned":true,"note":"章节与知识点按鲁科版官方目录树录入；知识点取官方「节」下叶子条目（保留官方原文），微项目与本章自我评价不单列为知识点。"},"books":[["必修第一册",[["第1章 认识化学科学",["化学科学的形成与发展","化学科学的主要特征与探索空间","研究物质性质的基本方法","研究物质性质的基本程序","物质的量及其单位——摩尔","摩尔质量和气体摩尔体积","物质的量浓度"]],["第2章 元素与物质世界",["元素与物质的关系","物质分类与物质性质","一种重要的混合物——胶体","电解质的电离","离子反应的含义与离子方程式","离子反应的应用","认识氧化还原反应","氧化剂与还原剂","氧化还原反应的应用"]],["第3章 物质的性质与转化",["亚铁盐和铁盐","铁、铁的氧化物和铁的氢氧化物","铁及其化合物之间的转化关系","自然界中的硫","实验室里研究不同价态硫元素之间的转化","酸雨及其防治","自然界中的氮循环","氮循环中物质的性质及物质之间的转化","人类活动对氮循环和环境的影响"]]]],["必修第二册",[["第1章 原子结构 元素周期律",["原子结构","原子结构与元素原子得失电子能力","元素周期律","元素周期表","认识同周期元素性质的递变规律","研究同主族元素的性质","预测元素及其化合物的性质"]],["第2章 化学键 化学反应规律",["化学键","离子键和共价键","离子化合物与共价化合物","化学反应中能量变化的本质及转化形式","化学反应能量转化的重要应用——化学电池","化学反应的快慢","化学反应的限度"]],["第3章 简单的有机化合物",["认识有机化合物的一般性质","碳原子的成键特点","有机化合物中的官能团 同分异构现象与同分异构体","从天然气、石油和煤中获取燃料","石油裂解与乙烯  煤的干馏与苯","有机高分子化合物与有机高分子材料","乙醇","乙酸"]]]],["选择性必修1 化学反应原理",[["第1章 化学反应与能量转化",["化学反应的反应热","化学反应的内能变化与焓变","反应焓变的计算","原电池的工作原理","化学电源","电解的原理","电解原理的应用","金属电化学腐蚀的原理","金属腐蚀的防护","电化学腐蚀原理的应用"]],["第2章 化学反应的方向、限度",["反应焓变与反应方向 反应熵变与反应方向","用焓变和熵变综合判断反应方向","化学平衡常数","平衡转化率","反应条件对化学平衡的影响","化学反应是有历程的 化学反应速率","浓度、温度、催化剂对化学反应速率的影响","第4节 化学反应条件的优化——工业合成氨"]],["第3章 物质在水溶液中的行为",["水的电离 电解质在水溶液中的存在形态","水溶液的酸碱性与pH","弱电解质的电离平衡","盐类水解的原理","水解平衡的移动 盐类水解的应用","沉淀溶解平衡与溶度积","沉淀溶解平衡的应用","离子反应发生的条件","离子反应的应用"]]]],["选择性必修2 物质结构与性质",[["第1章 原子结构与元素性质",["氢原子光谱和玻尔的原子结构模型","原子轨道","原子轨道的图形描述 电子在核外的空间分布","基态原子的核外电子排布","核外电子排布与元素周期表","原子半径及其变化规律","元素的电离能及其变化规律","元素的电负性及其变化规律"]],["第2章 微粒间相互作用与物质性质",["共价键的形成与特征","共价键的类型","键参数","分子空间结构的理论分析","分子的空间结构与分子性质","离子键","配位键","金属键","范德华力与物质性质","氢键与物质性质"]],["第3章 不同物质的聚集状态与性质",["晶体的特性","晶体结构的基本重复单元——晶胞","金属晶体 离子晶体","共价晶体 分子晶体","晶体结构的复杂性","液晶","纳米材料","超分子"]]]],["选择性必修3 有机化学基础",[["第1章 有机化合物的结构与性质 烃",["有机化学的发展","有机化合物的分类与命名","碳原子的成键方式","有机化合物的同分异构现象","有机化合物结构与性质的关系","烷烃及其性质","烯烃和炔烃及其性质","苯、苯的同系物及其性质"]],["第2章 官能团与有机化学反应 烃的衍生物",["有机化学反应的主要类型","有机化学反应类型的应用——卤代烃的性质和制备","醇概述","醇的化学性质","酚","常见的醛、酮","醛、酮的化学性质","糖类和核酸","羧酸概述 羧酸的化学性质","羧酸衍生物","氨基酸和蛋白质"]],["第3章 有机合成及其应用 合成高分子化合物",["有机合成的关键——碳骨架的构建和官能团的引入","有机合成路线的设计 有机合成的应用","有机化合物分子式的确定","有机化合物结构式的确定","高分子化合物概述 高分子化合物的合成——聚合反应","高分子化学反应 合成高分子材料"]]]]]},"生物":{"color":"#4E9A45","edition":{"version":"人教版","short":"人教","press":"人民教育出版社","scope":"必修1–2；选择性必修1–3","aligned":true},"books":[["必修第一册",[["走近细胞",["细胞是生命活动的基本单位","细胞的多样性与统一性","显微镜的使用","生命系统的结构层次","原核细胞与真核细胞"]],["组成细胞的分子",["蛋白质","核酸","糖类与脂质","水和无机盐"]],["细胞的基本结构",["细胞膜","细胞器","细胞核","细胞壁与细胞骨架","细胞器之间的协调配合"]],["细胞的物质输入和输出",["物质跨膜运输","质壁分离与复原","胞吞与胞吐","渗透作用","影响跨膜运输的因素"]],["细胞的能量供应和利用",["酶与ATP","细胞呼吸","光合作用","影响光合作用的因素"]],["细胞的生命历程",["细胞增殖","细胞分化","细胞衰老与凋亡","癌细胞"]]]],["必修第二册",[["遗传因子的发现",["孟德尔分离定律","自由组合定律","遗传实验设计","性状分离比的模拟实验","孟德尔实验的科学方法"]],["基因和染色体的关系",["减数分裂","受精作用","伴性遗传","减数分裂与有丝分裂的比较","遗传系谱图分析"]],["基因的本质",["DNA是主要遗传物质","DNA的结构","DNA的复制","肺炎链球菌转化实验","噬菌体侵染细菌实验"]],["基因的表达",["转录与翻译","基因表达调控","中心法则","密码子与反密码子","基因对性状的控制"]],["基因突变及其他变异",["基因突变","基因重组","染色体变异","人类遗传病"]],["生物的进化",["自然选择与适应","种群基因频率","物种形成与多样性","共同进化与生物多样性","生物进化的证据"]]]],["选择性必修第一册",[["人体的内环境与稳态",["内环境组成","内环境稳态","稳态调节机制","血浆与组织液的物质交换","内环境稳态的意义"]],["神经调节",["神经调节结构基础","神经冲动的产生与传导","突触与神经递质","神经调节实例"]],["体液调节",["激素调节","血糖调节","体温与水盐调节","神经—体液调节"]],["免疫调节",["免疫系统组成","特异性免疫","免疫失调","免疫学应用"]],["植物生命活动的调节",["生长素","其他植物激素","植物生长调节剂","生长素的发现过程","生长素作用的两重性"]]]],["选择性必修第二册",[["种群及其动态",["种群数量特征","种群增长曲线","种群数量调查","环境容纳量（K 值）","种群数量的波动与调节"]],["群落及其演替",["群落结构","种间关系","群落演替","群落的季节性变化","人类活动对群落演替的影响"]],["生态系统及其稳定性",["生态系统结构","能量流动","物质循环","信息传递","生态系统稳定性"]],["人与环境",["生态环境问题","生物多样性保护","生态工程","生物多样性的价值","生态工程的原理"]]]],["选择性必修第三册",[["发酵工程",["微生物培养","发酵技术","发酵工程应用","微生物的纯化与计数","发酵工程的基本环节"]],["细胞工程",["植物细胞工程","动物细胞工程","胚胎工程","植物组织培养","动物细胞融合与单克隆抗体","核移植技术"]],["基因工程",["基因工程工具","基因工程操作","基因工程应用","PCR 技术","基因表达载体的构建","目的基因的检测与鉴定"]],["生物技术的安全性与伦理问题",["转基因生物安全","生物技术伦理","禁止生物武器","转基因技术的安全性争论","生物武器与生物安全"]]]]]},"政治":{"color":"#B94F78","edition":{"version":"统编版","short":"统编","press":"人民教育出版社","scope":"必修1–4；选择性必修1–3","aligned":true},"books":[["必修一 中国特色社会主义",[["社会主义从空想到科学、从理论到实践的发展",["原始社会与阶级社会","科学社会主义的产生","社会主义实践","空想社会主义的局限","资本主义社会的基本矛盾"]],["只有社会主义才能救中国",["新民主主义革命","社会主义改造","社会主义制度确立","近代中国救亡图存的探索","新民主主义革命的性质与前途"]],["只有中国特色社会主义才能发展中国",["改革开放","中国特色社会主义道路","中国特色社会主义理论体系","社会主义初级阶段的基本路线","中国特色社会主义制度优势"]],["只有坚持和发展中国特色社会主义才能实现中华民族伟大复兴",["新时代主要矛盾","习近平新时代中国特色社会主义思想","中国梦","新时代的历史方位","分两步走的战略安排"]]]],["必修二 经济与社会",[["我国的基本经济制度",["公有制为主体","多种所有制共同发展","按劳分配为主体","公有制经济的地位与作用","非公有制经济的地位与作用"]],["我国的社会主义市场经济体制",["市场调节","更好发挥政府作用","宏观调控","市场体系与市场秩序","社会主义市场经济体制的基本特征"]],["我国的经济发展",["新发展理念","高质量发展","现代化经济体系","乡村振兴与区域协调发展","实体经济与数字经济"]],["我国的个人收入分配与社会保障",["收入分配","社会保障","共同富裕","初次分配与再分配","第三次分配"]]]],["必修三 政治与法治",[["中国共产党的领导",["党的性质与宗旨","党的领导方式","全面从严治党","党的领导是中国特色社会主义最本质的特征","党的群众路线"]],["人民当家作主",["人民代表大会制度","基层群众自治","协商民主","全过程人民民主","民族区域自治制度"]],["全面依法治国",["法治国家","法治政府","法治社会","科学立法与严格执法"]]]],["必修四 哲学与文化",[["时代精神的精华",["哲学基本问题","唯物主义与唯心主义","马克思主义哲学","哲学与具体科学的关系","马克思主义中国化时代化"]],["探究世界的本质",["物质与意识","规律与主观能动性","一切从实际出发","世界的物质统一性","意识活动的特点"]],["把握世界的规律",["联系观","发展观","矛盾观","辩证否定观"]],["认识社会与价值选择",["社会存在与社会意识","社会基本矛盾","人民群众","价值观"]],["文化传承与文化创新",["文化的作用","文化交流与互鉴","文化创新","文化自信"]]]],["选择性必修一 当代国际政治与经济",[["各具特色的国家",["国家本质与形式","国家结构","政党与利益集团","国家主权","政权组织形式"]],["世界多极化",["国际关系","多极化趋势","和平与发展","国际关系的决定因素","中国特色大国外交"]],["经济全球化",["经济全球化表现","全球治理","开放型世界经济","经济全球化的影响","发展中国家如何应对经济全球化"]],["国际组织",["联合国","区域性国际组织","国际组织作用","国际组织的分类","中国与国际组织"]]]],["选择性必修二 法律与生活",[["民事权利与义务",["民事主体","物权","合同","侵权责任"]],["家庭与婚姻",["婚姻家庭关系","继承","未成年人保护","结婚条件与程序","离婚与财产分割"]],["就业与创业",["劳动合同","劳动者权益","创业与经营","就业维权途径","企业的设立与经营"]],["社会争议解决",["调解","仲裁","诉讼","诉讼权利与诉讼程序","法律援助"]]]],["选择性必修三 逻辑与思维",[["树立科学思维观念",["思维特征","科学思维","创新思维","思维的间接性与概括性","抽象思维与形象思维"]],["遵循逻辑思维规则",["概念","判断","推理","逻辑规律"]],["运用辩证思维方法",["分析与综合","归纳与演绎","辩证否定","辩证思维的特征","整体性与动态性"]],["提高创新思维能力",["联想与想象","发散与聚合","逆向思维","超前思维","头脑风暴法与检核表法"]]]]]},"历史":{"color":"#93623B","edition":{"version":"统编版","short":"统编","press":"人民教育出版社","scope":"中外历史纲要上、下册；选择性必修1–3","aligned":true},"books":[["中外历史纲要（上）",[["从中华文明起源到秦汉统一多民族封建国家的建立与巩固",["中华文明起源","春秋战国社会变革","秦统一与中央集权","汉代大一统"]],["三国两晋南北朝的民族交融与隋唐统一多民族封建国家的发展",["民族交融","隋唐制度创新","隋唐经济文化","安史之乱与藩镇"]],["辽宋夏金多民族政权的并立与元朝的统一",["多政权并立","宋代经济文化","元朝统一与行省制","宋元科技与文学艺术","宋代的科举与文官政治"]],["明清中国版图的奠定与面临的挑战",["明清君主专制强化","明清经济与对外","明清思想文化","明清疆域的奠定","明清时期的人口与移民"]],["晚清时期的内忧外患与救亡图存",["鸦片战争","太平天国与洋务运动","甲午战争与戊戌变法","义和团与清末新政"]],["辛亥革命与中华民国的建立",["辛亥革命","中华民国建立","北洋军阀统治","三民主义","辛亥革命的意义与局限"]],["中国共产党成立与新民主主义革命兴起",["五四运动","中国共产党成立","国共合作与北伐","工农武装割据","红军长征"]],["中华民族的抗日战争和人民解放战争",["抗日战争","解放战争","新民主主义革命胜利","抗日民族统一战线","解放战争的战略决战"]],["中华人民共和国成立和社会主义革命与建设",["新中国成立","社会主义改造","社会主义建设探索","人民代表大会制度的建立","“一五”计划与工业化起步"]],["改革开放与社会主义现代化建设新时期",["十一届三中全会","改革开放","社会主义市场经济","新时代成就"]]]],["中外历史纲要（下）",[["古代文明的产生与发展",["早期文明","古代帝国","文明交流","文明产生的条件","古代文明的多元特点"]],["中古时期的世界",["西欧封建社会","拜占庭与俄罗斯","阿拉伯与奥斯曼","中古亚洲与非洲"]],["走向整体的世界",["新航路开辟","全球联系建立","早期殖民扩张","新航路开辟的影响","商业革命与价格革命"]],["资本主义制度的确立",["文艺复兴与宗教改革","启蒙运动","资产阶级革命","资本主义制度扩展"]],["工业革命与马克思主义的诞生",["工业革命","马克思主义诞生","巴黎公社","工业革命的影响","空想社会主义与工人运动"]],["世界殖民体系与亚非拉民族独立运动",["殖民体系形成","亚非拉民族独立","第一次世界大战","殖民扩张的影响","亚非拉民族民主运动"]],["两次世界大战、十月革命与国际秩序的演变",["十月革命","凡尔赛—华盛顿体系","第二次世界大战","冷战"]],["20世纪下半叶世界的新变化",["资本主义新变化","社会主义国家发展","殖民体系瓦解","多极化趋势"]],["当代世界发展的特点与主要趋势",["经济全球化","政治多极化","人类命运共同体","发展中国家的崛起","全球治理与全球性挑战"]]]],["选择性必修一 国家制度与社会治理",[["政治制度",["中国古代政治制度","西方政治制度","共和制与君主立宪制","中国古代中央集权的演变","资产阶级代议制的特点"]],["官员的选拔与管理",["科举制","文官制度","干部人事制度","察举制与九品中正制","新中国干部人事制度的改革"]],["法律与教化",["中国古代法律","西方法律","法治与德治","罗马法","新中国的法治建设"]],["民族关系与国家关系",["中国古代民族关系","近代民族国家","新中国民族政策","边疆治理与民族交融","国际法的形成与外交制度"]],["货币与赋税制度",["货币演变","赋税制度","关税与个人所得税","纸币的出现与信用货币","赋税制度改革的趋势"]],["基层治理与社会保障",["古代基层治理","现代基层治理","社会保障","中国古代的户籍制度","西方社会保障制度"]]]],["选择性必修二 经济与社会生活",[["食物生产与社会生活",["农业起源","食物生产与交换","食品安全","古代农业与饮食结构","食物储备与救济"]],["生产工具与劳作方式",["生产工具演变","劳作方式","工业革命与工厂制","农业工具与水利工程","机器大生产与劳动分工"]],["商业贸易与日常生活",["商业贸易发展","货币与信贷","世界市场","丝绸之路与商贸往来","商业经营方式的变化"]],["村落、城镇与居住环境",["村落与集镇","城市化","居住环境","古代城市与坊市制度","居住环境与公共卫生"]],["交通与社会变迁",["交通进步","交通与社会生活","现代交通","铁路与轮船的出现","交通对城市化进程的影响"]],["医疗与公共卫生",["古代医疗","现代医学","公共卫生体系","中医药的主要成就","疫病防治与医学发展"]]]],["选择性必修三 文化交流与传播",[["源远流长的中华文化",["中华文化发展","中华文化内涵","中华文化世界影响","儒家思想的演变","中华文化圈"]],["丰富多样的世界文化",["古代亚非文化","古希腊罗马文化","中古与近代文化","宗教与文化","世界文化的多样性"]],["人口迁徙、文化交融与认同",["古代人口迁徙","近代移民","文化认同","殖民扩张与人口迁移","移民社会的文化多元"]],["商路、贸易与文化交流",["丝绸之路","近代商路","贸易与文化传播","茶叶与瓷器贸易","朝贡贸易与民间贸易"]],["战争与文化交锋",["战争与文化冲突","战争与文化融合","文化重建","拿破仑战争与文化传播","两次世界大战与文化"]],["文化的传承与保护",["文化遗产","文化传承","文化保护","博物馆与图书馆","非物质文化遗产的保护"]]]]]},"地理":{"color":"#3A87B8","edition":{"version":"湘教版","short":"湘教","press":"湖南教育出版社","scope":"必修1–2；选择性必修1–3（图册为星球版）","aligned":true,"note":"章节按湘教版官方目录树录入；知识点取官方「节」名；开篇导言「走进地理学」不属章节，未纳入索引。"},"books":[["必修第一册",[["第一章 宇宙中的地球",["第一节 地球的宇宙环境","第二节 太阳对地球的影响","第三节 地球的圈层结构","第四节 地球的演化"]],["第二章 地球表面形态",["第一节 流水地貌","第二节 风成地貌","第三节 喀斯特、海岸和冰川地貌"]],["第三章 地球上的大气",["第一节 大气的组成与垂直分层","第二节 大气受热过程","第三节 大气热力环流"]],["第四章 地球上的水",["第一节 水循环","第二节 海水的性质和运动","第三节 海洋与人类"]],["第五章 地球上的植被与土壤",["第一节 主要植被与自然环境","第二节 土壤的形成"]]]],["必修第二册",[["第一章 人口与地理环境",["第一节 人口分布","第二节 人口迁移","第三节 人口容量"]],["第二章 城镇和乡村",["第一节 城乡空间结构","第二节 地域文化与城乡景观","第三节 城镇化进程及其影响"]],["第三章 产业区位选择",["第一节 农业区位因素与农业布局","第二节 工业区位因素与工业布局","第三节 服务业的区位选择"]],["第四章 区域发展战略",["第一节 交通运输与区域发展","第二节 我国区域发展战略","第三节 海洋权益与我国海洋发展战略"]],["第五章 人地关系与可持续发展",["第一节 人类面临的主要环境问题","第二节 协调人地关系，实现可持续发展"]]]],["选择性必修1 自然地理基础",[["第一章 地球的运动",["第一节 地球的自转","第二节 地球的公转"]],["第二章 岩石圈与地表形态",["第一节 岩石圈物质循环","第二节 地表形态的变化","第三节 地表形态与人类活动"]],["第三章 大气的运动",["第一节 气压带、风带的形成与移动","第二节 气压带、风带与气候","第三节 天气系统"]],["第四章 陆地水与洋流",["第一节 陆地水体间的相互关系","第二节 洋流","第三节 海—气相互作用"]],["第五章 自然环境的整体性与差异性",["第一节 自然环境的整体性","第二节 自然环境的地域差异性"]]]],["选择性必修2 区域发展",[["第一章 认识区域",["第一节 区域及其类型","第二节 区域发展差异与因地制宜","第三节 区域联系与区域协调发展"]],["第二章 区域发展",["第一节 大都市的辐射功能——以我国上海为例","第二节 产业转型地区的结构优化——以美国休斯敦为例","第三节 资源枯竭型地区的可持续发展——以德国鲁尔区为例","第四节 生态脆弱区的综合治理——以我国荒漠化地区为例"]],["第三章 区域合作",["第一节 产业转移对区域发展的影响","第二节 资源跨区域调配对区域发展的影响","第三节 长江流域协作开发与环境保护","第四节 “一带一路”倡议与国际合作"]]]],["选择性必修3 资源、环境与国家安全",[["第一章 资源、环境与人类活动",["第一节 自然资源与人类活动","第二节 人类活动与环境问题"]],["第二章 自然资源与国家安全",["第一节 耕地资源与国家粮食安全","第二节 水资源与国家安全","第三节 矿产资源与国家安全","第四节 石油资源与国家安全","第五节 海洋空间资源与国家安全"]],["第三章 生态环境保护与国家安全",["第一节 碳排放与国际减排合作","第二节 自然保护区与生态安全","第三节 污染物跨境转移与环境安全","第四节 环境保护政策、措施与国家安全"]]]]]}}};
 /* CATALOG_DATA_END */
-/* DEMO_PACK_START */
-const DEMO_PACKS=[
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-math-bx1",
-    "subject": "数学",
-    "book": "必修第一册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "集合是确定的、彼此不同的对象组成的整体。判断一组对象能否组成集合，关键看元素是否确定、是否互异。常用表示方法有列举法、描述法和图示法。列举法把元素一一写出；描述法用元素的共同特征表示；图示法用韦恩图表示集合之间的关系。"
-      },
-      {
-        "page": 2,
-        "text": "集合间的基本关系包括子集、真子集和集合相等。若集合 A 的任意元素都属于集合 B，则 A 是 B 的子集，记作 A⊆B。若 A⊆B 且存在 B 中元素不属于 A，则 A 是 B 的真子集。判断两个集合相等，需要同时验证 A⊆B 与 B⊆A。"
-      },
-      {
-        "page": 3,
-        "text": "集合的基本运算有交集、并集和补集。交集 A∩B 由同时属于 A 和 B 的元素组成；并集 A∪B 由属于 A 或属于 B 的元素组成；补集只相对于给定全集而言。解题时先明确全集，再利用数轴或韦恩图检查端点是否取到。"
-      },
-      {
-        "page": 4,
-        "text": "充分条件与必要条件：若命题 p 成立可以推出命题 q 成立，则 p 是 q 的充分条件，q 是 p 的必要条件。判断时要区分“谁能推出谁”，并注意“充分不必要”“必要不充分”“充要”三种关系。含参数的取值范围问题，常转化为集合的包含关系处理。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "集合与常用逻辑用语",
-        "pageStart": 1,
-        "pageEnd": 4,
-        "points": [
-          {
-            "name": "集合的概念与表示",
-            "page": 1
-          },
-          {
-            "name": "集合间的基本关系",
-            "page": 2
-          },
-          {
-            "name": "集合的基本运算",
-            "page": 3
-          },
-          {
-            "name": "充分条件与必要条件",
-            "page": 4
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-chinese-bx1",
-    "subject": "语文",
-    "book": "必修上册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "鉴赏现代诗歌，先抓意象。意象是诗人用来承载情感的物象，分析时要说明意象本身的特点、所在语境以及它与情感之间的联系，不能只罗列“月亮代表思乡”这类固定说法。"
-      },
-      {
-        "page": 2,
-        "text": "诗歌语言与节奏需要结合分行、停顿、重复和押韵分析。节奏服务于情绪推进：急促的短句常表现紧张或强烈情感，舒缓的长句常表现沉思与回味。答题时要引用具体词句，再说明表达效果。"
-      },
-      {
-        "page": 3,
-        "text": "情感主题分析要区分表层内容与深层情感。先概括诗歌写了什么，再结合关键意象、抒情方式和时代背景，判断诗人表达了怎样的情感与思考。避免只用“表达了作者的热爱之情”这类空泛结论。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "现代诗歌鉴赏",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "意象与意境",
-            "page": 1
-          },
-          {
-            "name": "诗歌语言与节奏",
-            "page": 2
-          },
-          {
-            "name": "情感主题分析",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-english-bx1",
-    "subject": "英语",
-    "book": "必修第一册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "Teenage life 话题词汇可按校园生活、兴趣爱好、人际关系和时间管理分组积累。记忆时把名词、动词和常见搭配放在同一语境中，例如 sign up for a club, manage one's time, get along with classmates。"
-      },
-      {
-        "page": 2,
-        "text": "名词短语以名词为中心词，形容词短语以形容词为中心词。分析长句时先找中心词，再看修饰成分。形容词短语可作定语、表语或宾语补足语，判断成分时要结合它在句中的位置和功能。"
-      },
-      {
-        "page": 3,
-        "text": "建议信写作通常包含三部分：说明写信目的，提出两到三条具体建议并说明理由，最后表达希望。语气要礼貌、明确，可使用 I suggest that you should... 或 It would be helpful to... 等句式，避免只堆砌建议而不给理由。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "Unit 1 A new start",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "Starting out & Understanding ideas (文本解读)",
-            "page": 1
-          },
-          {
-            "name": "Understanding ideas (语言学习) & Using language (语法)",
-            "page": 2
-          },
-          {
-            "name": "Developing ideas (写作)",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-physics-bx1",
-    "subject": "物理",
-    "book": "必修第一册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "匀变速直线运动的速度随时间均匀变化，加速度保持不变。基本公式包括 v=v0+at、x=v0t+at²/2 和 v²-v0²=2ax。使用前先规定正方向，再判断各量的正负号。"
-      },
-      {
-        "page": 2,
-        "text": "自由落体运动是初速度为零、加速度为 g 的匀加速直线运动，前提是忽略空气阻力。实际问题中若阻力不可忽略，就不能直接套用自由落体公式，需要根据受力情况重新分析。"
-      },
-      {
-        "page": 3,
-        "text": "运动图象包括位移—时间图象和速度—时间图象。位移—时间图象的斜率表示速度；速度—时间图象的斜率表示加速度，图线与时间轴围成的面积表示位移。读图时先确认坐标轴物理量，再判断正负方向。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "匀变速直线运动",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "匀变速直线运动规律",
-            "page": 1
-          },
-          {
-            "name": "自由落体运动",
-            "page": 2
-          },
-          {
-            "name": "速度—时间图象",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-chemistry-bx1",
-    "subject": "化学",
-    "book": "必修第一册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "物质分类可按组成和性质进行。胶体是分散质粒子直径在 1–100 nm 之间的分散系，具有丁达尔效应。区分溶液、胶体和浊液时，不能只看外观，要结合分散质粒子大小和现象判断。"
-      },
-      {
-        "page": 2,
-        "text": "离子反应发生的条件包括生成沉淀、放出气体或生成弱电解质。书写离子方程式时，易溶且易电离的物质拆成离子，沉淀、气体、水和弱电解质保留化学式，最后检查电荷守恒和原子守恒。"
-      },
-      {
-        "page": 3,
-        "text": "氧化还原反应的实质是电子转移。化合价升高的元素被氧化，发生氧化反应；化合价降低的元素被还原，发生还原反应。判断氧化剂和还原剂时，先标出变价元素，再比较反应前后的化合价。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "第2章 元素与物质世界",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "一种重要的混合物——胶体",
-            "page": 1
-          },
-          {
-            "name": "离子反应的含义与离子方程式",
-            "page": 2
-          },
-          {
-            "name": "认识氧化还原反应",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-biology-bx1",
-    "subject": "生物",
-    "book": "必修第一册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "细胞是生命活动的基本单位。生命系统的结构层次由小到大包括细胞、组织、器官、系统、个体、种群、群落、生态系统和生物圈。植物没有系统层次，单细胞生物既是细胞也是个体。"
-      },
-      {
-        "page": 2,
-        "text": "原核细胞与真核细胞的主要区别是有无以核膜为界限的细胞核。原核细胞没有核膜包被的细胞核，只有拟核；真核细胞具有细胞核和多种细胞器。两者都以 DNA 作为遗传物质，都含有核糖体。"
-      },
-      {
-        "page": 3,
-        "text": "显微镜使用遵循先低倍后高倍的原则。换用高倍镜后视野变暗、看到的细胞数目变少、细胞变大。若物像偏在视野一侧，应先把物像移到视野中央，再转换高倍镜，不能直接在高倍镜下寻找目标。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "走近细胞",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "细胞是生命活动的基本单位",
-            "page": 1
-          },
-          {
-            "name": "原核细胞与真核细胞",
-            "page": 2
-          },
-          {
-            "name": "显微镜的使用",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-politics-bx1",
-    "subject": "政治",
-    "book": "必修一 中国特色社会主义",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "新民主主义革命是无产阶级领导的、人民大众的、反对帝国主义、封建主义和官僚资本主义的革命。它与旧民主主义革命的根本区别在于领导阶级不同，革命前途也不同。"
-      },
-      {
-        "page": 2,
-        "text": "社会主义改造采取和平方式，逐步把生产资料私有制转变为社会主义公有制。1956 年社会主义改造基本完成，标志着社会主义制度在我国确立，我国进入社会主义初级阶段。"
-      },
-      {
-        "page": 3,
-        "text": "分析“只有社会主义才能救中国”，要从近代中国各种救国方案的失败、新民主主义革命的胜利和社会主义制度的确立三个层面展开，做到史论结合，避免只堆砌结论。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "只有社会主义才能救中国",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "新民主主义革命",
-            "page": 1
-          },
-          {
-            "name": "社会主义改造",
-            "page": 2
-          },
-          {
-            "name": "社会主义制度确立",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-history-bx1",
-    "subject": "历史",
-    "book": "中外历史纲要（上）",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "辛亥革命推翻了清王朝统治，结束了两千多年的君主专制制度，建立了中华民国，使民主共和观念逐渐深入人心。评价历史事件要同时看到进步性和局限性，不能只给单一结论。"
-      },
-      {
-        "page": 2,
-        "text": "中华民国建立后，颁布《中华民国临时约法》，确立主权在民、三权分立等原则。但革命果实很快被袁世凯窃取，北洋军阀统治时期政局动荡，说明资产阶级共和方案在半殖民地半封建的中国难以真正实现。"
-      },
-      {
-        "page": 3,
-        "text": "分析辛亥革命的局限，要从革命对象、群众基础、领导力量和反帝反封建任务完成情况等角度展开。答题时先给观点，再用史实支撑，最后回扣“资产阶级革命派的软弱性和妥协性”。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "辛亥革命与中华民国的建立",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "辛亥革命",
-            "page": 1
-          },
-          {
-            "name": "中华民国建立",
-            "page": 2
-          },
-          {
-            "name": "辛亥革命的意义与局限",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "format": "jiuke-content-pack",
-    "formatVersion": 1,
-    "packId": "demo-geography-bx1",
-    "subject": "地理",
-    "book": "必修第一册",
-    "demo": true,
-    "publisher": "演示数据",
-    "license": "自撰演示内容，非教材原文，仅用于体验检索与引用流程",
-    "pages": [
-      {
-        "page": 1,
-        "text": "大气自下而上分为对流层、平流层和高层大气。对流层集中了大部分水汽和杂质，对流运动显著，天气现象复杂多变；平流层大气以水平运动为主，气流平稳，适合航空飞行。"
-      },
-      {
-        "page": 2,
-        "text": "大气受热过程可概括为：太阳辐射到达地面，地面吸收后增温并以长波辐射形式向外传递，大气吸收地面辐射后增温，再通过大气逆辐射把热量还给地面。云量增多时，白天削弱作用增强，夜晚保温作用增强。"
-      },
-      {
-        "page": 3,
-        "text": "热力环流形成的根本原因是地面冷热不均。受热地区空气上升，近地面形成低压；冷却地区空气下沉，近地面形成高压。高空气压高低与近地面相反，判断风向时还要考虑水平气压梯度力和地转偏向力。"
-      }
-    ],
-    "chapters": [
-      {
-        "name": "第三章 地球上的大气",
-        "pageStart": 1,
-        "pageEnd": 3,
-        "points": [
-          {
-            "name": "第一节 大气的组成与垂直分层",
-            "page": 1
-          },
-          {
-            "name": "第二节 大气受热过程",
-            "page": 2
-          },
-          {
-            "name": "第三节 大气热力环流",
-            "page": 3
-          }
-        ]
-      }
-    ]
-  }
-];
-/* DEMO_PACK_END */
+const DEMO_PACKS=[];
 const CATALOG_META = CATALOG_DATA.meta || {};
 
 /* 把「册次 → 章节 → 知识点」的原始目录编译成可检索结构 */
@@ -2375,7 +1975,7 @@ const NOTES = {
 
 /* ---------------- state ---------------- */
 const LS_KEY = 'jiuke_kb_v1';
-const SHARE_MODE = false;
+const SHARE_MODE = true;
 let saveWarned=false;
 function cloneSeed(){
   const items=JSON.parse(JSON.stringify(SEED_ITEMS));
@@ -5884,6 +5484,19 @@ const AIT = (()=>{
     siliconflow:{base:'https://api.siliconflow.cn/v1',model:'deepseek-ai/DeepSeek-V3'},
     custom:{base:'',model:''}
   };
+  /* 仅作输入提示，不做白名单：第三方兼容网关可自由填写 */
+  const MODEL_SUGGEST={
+    deepseek:['deepseek-chat','deepseek-reasoner'],
+    moonshot:['moonshot-v1-8k','moonshot-v1-32k'],
+    siliconflow:['deepseek-ai/DeepSeek-V3','Qwen/Qwen2.5-72B-Instruct'],
+    custom:[]
+  };
+  const MODEL_HINT={
+    deepseek:'DeepSeek 官方常用：deepseek-chat（通用）/ deepseek-reasoner（推理）；第三方兼容网关请按其控制台「可用模型」填写。',
+    moonshot:'Moonshot 常用：moonshot-v1-8k / moonshot-v1-32k；以控制台可用列表为准。',
+    siliconflow:'SiliconFlow 模型名通常带厂商前缀，如 deepseek-ai/DeepSeek-V3；以控制台为准。',
+    custom:'填写服务商文档里的模型 ID；名称区分大小写，不能含空格。'
+  };
   const EX={
     '语文':['《红楼梦》的主要人物关系怎么梳理？','议论文的论证方法题怎么答？','文言实词一词多义怎么积累？'],
     '数学':['这道导数极值题该怎么判断？','椭圆离心率的取值范围怎么求？','数列求和的常用方法有哪些？'],
@@ -6653,7 +6266,10 @@ const AIT = (()=>{
     }
     let act='';
     if(m.status==='done'&&m.content) act=`<div class="ait-actions"><button type="button" data-ait="copy" data-mid="${esc(m.id)}">复制</button></div>`;
-    else if(m.status==='error'||(m.status==='stopped'&&!m.content)) act=`<div class="ait-actions"><button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
+    else if(m.status==='error'||(m.status==='stopped'&&!m.content)){
+      const fix=m.error&&m.error.code==='model';
+      act=`<div class="ait-actions">${fix?`<button type="button" data-ait="fixmodel" data-mid="${esc(m.id)}">改模型</button>`:''}<button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
+    }
     else if(m.status==='stopped'&&m.content) act=`<div class="ait-actions"><button type="button" data-ait="copy" data-mid="${esc(m.id)}">复制</button><button type="button" data-ait="retry" data-mid="${esc(m.id)}">重新生成</button></div>`;
     return `<div class="ait-msg ai" data-mid="${esc(m.id)}"><div class="ait-av">师</div><div class="ait-bubble"><div class="ait-stream">${body}</div>${err}${stop}${cites}${act}</div></div>`;
   }
@@ -6803,14 +6419,44 @@ const AIT = (()=>{
   }
 
   /* ---------- 请求 ---------- */
+  /* 各家服务端对模型名错误措辞不同：Model Not Exist / unsupported / supported API model names are … */
+  function isModelError(raw){
+    const s=String(raw||'');
+    if(/supported\s+api\s+model\s+names?/i.test(s)) return true;
+    if(/(invalid|unknown|unsupported|unrecognized)\s+(api\s+)?model/i.test(s)) return true;
+    if(/(model|模型)[^。\n]{0,48}(not\s*(exist|found|supported|available)|does\s*not\s*exist|is\s*not\s*supported|不存在|不支持|无效)/i.test(s)) return true;
+    return false;
+  }
+  function modelError(e){
+    const raw=String((e&&e.message)||'');
+    const bad=(e&&e.model)||'';
+    let list=[];
+    const m=raw.match(/supported\s+api\s+model\s+names?\s*(?:are|is)?\s*:?\s*([^\n]+)/i);
+    if(m){
+      list=m[1].split(/\bbut\b|[,，;；]\s*(?:and\s+)?you\s+(?:passed|sent|provided)/i)[0]
+        .replace(/\band\b/gi,',')
+        .split(/[,，、;；\s]+/)
+        .map(x=>x.replace(/^["'`(\[]+|["'`.,。)\]）]+$/g,''))
+        .filter(x=>x&&!/^(the|are|is)$/i.test(x))
+        .slice(0,6);
+    }
+    let text='模型名称无效：'+(bad?'当前「'+bad+'」':'当前填写的模型名')+'不被服务端支持。';
+    if(list.length) text+='服务端可用模型：'+list.join(' / ')+'。';
+    text+='请打开「模型设置」把「模型」改成'+(list.length?'上面列出的名称':'服务商控制台里的模型名')
+      +(list.length?'':'（DeepSeek 官方可先用 deepseek-chat）')+'，保存后再重试。';
+    return {code:'model',text:text,modelList:list,detail:raw.slice(0,300)};
+  }
   function mapError(e){
     const st=e&&e.status;
-    if(st===401||st===403) return {code:'auth',text:'密钥无效或无权限，请检查模型设置'};
-    if(st===404) return {code:'notfound',text:'接口地址或模型名称不正确（404）'};
+    const raw=String((e&&e.message)||'');
+    if(isModelError(raw)) return modelError(e);
+    if(st===401||st===403) return {code:'auth',text:'密钥无效或无权限：请在「模型设置」里检查 API Key 是否填对（前后不要有空格），并确认账户已开通该模型',detail:raw.slice(0,200)};
+    if(st===404) return {code:'notfound',text:'接口地址或模型名称不正确（404）：DeepSeek 官方地址为 https://api.deepseek.com，请同时核对模型名',detail:raw.slice(0,200)};
     if(st===429) return {code:'limit',text:'请求过于频繁或额度不足，请稍后再试'};
     if(st>=500) return {code:'server',text:'模型服务暂时不可用，请稍后重试'};
-    if(e&&(e.name==='TypeError'||/failed to fetch|networkerror|load failed/i.test(e.message||''))) return {code:'network',text:'网络或跨域请求失败：请检查接口地址；分享版无法访问本机代理'};
-    return {code:'unknown',text:(e&&e.message)||'请求失败，请重试'};
+    if(st===400||st===422) return {code:'badreq',text:'请求被服务端拒绝（'+st+'）'+(raw?'：'+raw.slice(0,160):'')+'。请检查模型名称、接口地址和参数',detail:raw.slice(0,200)};
+    if(e&&(e.name==='TypeError'||/failed to fetch|networkerror|load failed/i.test(raw))) return {code:'network',text:'网络或跨域请求失败：请检查接口地址；分享版无法访问本机代理'};
+    return {code:'unknown',text:raw||'请求失败，请重试'};
   }
   async function request(c,payload,onDelta,signal,extra){
     extra=extra||{};
@@ -6825,6 +6471,7 @@ const AIT = (()=>{
       try{ const j=await res.json(); detail=(j&&j.error&&(j.error.message||j.error))||j.message||''; }catch(e){}
       const err=new Error(detail||('HTTP '+res.status));
       err.status=res.status;
+      err.model=(payload&&payload.model)||'';
       throw err;
     }
     const ct=(res.headers.get('content-type')||'').toLowerCase();
@@ -7022,11 +6669,25 @@ const AIT = (()=>{
   function removeAtt(i){ const l=attList(); l.splice(i,1); renderChips(); updateSendBtn(); }
 
   /* ---------- 设置 ---------- */
-  function openSettings(){
+  let pendingModelFocus=false;
+  let modelSuggests=[];
+  function focusModel(){
+    pendingModelFocus=false;
+    const el=$a('aiModel'); if(!el) return;
+    try{ el.scrollIntoView({block:'center'}); }catch(e){}
+    el.focus();
+    try{ el.select(); }catch(e){}
+  }
+  function openSettings(opts){
+    opts=opts||{};
+    modelSuggests=Array.isArray(opts.suggests)?opts.suggests.filter(Boolean).slice(0,6):[];
     fillSettings();
+    syncModelHint();
     $a('aiSettings').classList.add('open');
+    if(opts.focusModel) pendingModelFocus=true;
     if(pinReady()&&!pinOk){ openPinGate(); return; }
     closePinGate();
+    if(pendingModelFocus) setTimeout(focusModel,60);
   }
   function closeSettings(){
     closePinGate();
@@ -7061,7 +6722,9 @@ const AIT = (()=>{
     if(d===cfg.pinHash){
       pinOk=true; pinFails=0;
       if(inp) inp.value=''; if(msg) msg.textContent='';
-      closePinGate(); if(msg) msg.classList.remove('warn'); render(); return;
+      closePinGate(); if(msg) msg.classList.remove('warn'); render();
+      if(pendingModelFocus) setTimeout(focusModel,60);
+      return;
     }
     pinFails++;
     if(pinFails>=LIMITS.pinFails){
@@ -7080,6 +6743,27 @@ const AIT = (()=>{
       $a('aiModeSeg').querySelectorAll('button').forEach(b=>{ b.disabled=b.dataset.mode==='direct'; });
     }
   }
+  function syncModelHint(){
+    const el=$a('aiModelHint'); if(!el) return;
+    const preset=$a('aiPreset').value||'custom';
+    const model=$a('aiModel').value.trim();
+    const known=MODEL_SUGGEST[preset]||[];
+    const dl=$a('aiModelList');
+    if(dl) dl.innerHTML=known.map(m=>'<option value="'+esc(m)+'"></option>').join('');
+    const pick=$a('aiModelPick');
+    if(pick){
+      const list=modelSuggests.filter(m=>m!==model).slice(0,4);
+      pick.innerHTML=list.map(m=>`<button type="button" data-model="${esc(m)}">用 ${esc(m)}</button>`).join('');
+      pick.hidden=!list.length;
+    }
+    if(preset==='deepseek'&&model&&known.indexOf(model)<0){
+      el.textContent='当前「'+model+'」不是 DeepSeek 官方常用模型名。若使用第三方兼容网关，以服务商控制台「可用模型」为准；否则请改成 deepseek-chat。';
+      el.classList.add('warn');
+      return;
+    }
+    el.textContent=MODEL_HINT[preset]||MODEL_HINT.custom;
+    el.classList.remove('warn');
+  }
   function tplHint(){
     const el=$a('aiPromptTpl'), hint=$a('aiTplHint');
     if(!el||!hint) return;
@@ -7092,6 +6776,8 @@ const AIT = (()=>{
     $a('aiPreset').value=cfg.preset||'custom';
     $a('aiBaseUrl').value=cfg.baseUrl||'';
     $a('aiModel').value=cfg.model||'';
+    const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
+    syncModelHint();
     $a('aiRemember').checked=!!cfg.keyRemember;
     $a('aiKey').value=getKey();
     $a('aiProxyToken').value=getToken();
@@ -7121,7 +6807,10 @@ const AIT = (()=>{
     const model=$a('aiModel').value.trim();
     if(!baseUrl){ toast('请填写接口地址',false); return null; }
     if(!/^https?:\/\//i.test(baseUrl)){ toast('接口地址需以 http(s):// 开头',false); return null; }
-    if(!model){ toast('请填写模型名称',false); return null; }
+    if(!model){ toast('请填写模型名称',false); $a('aiModel').focus(); return null; }
+    if(model.length>120||!/^[A-Za-z0-9][A-Za-z0-9._:\/@+-]*$/.test(model)){
+      toast('模型名只能包含字母、数字和 . _ - : / @ +',false); $a('aiModel').focus(); return null;
+    }
     if(mode==='direct'&&!$a('aiKey').value.trim()&&!getKey()){ toast('请填写 API Key',false); return null; }
     const subjects=Array.prototype.slice.call($a('aiSubjPick').querySelectorAll('.ait-pick.on')).map(b=>b.dataset.subj);
     if(!subjects.length){ toast('请至少允许一个学科提问',false); return null; }
@@ -7162,14 +6851,19 @@ const AIT = (()=>{
   }
   async function testConnection(){
     const c=readForm(); if(!c) return;
-    const btn=$a('aiTestBtn'), old=btn.textContent;
+    const btn=$a('aiTestBtn'), old=btn.textContent, msg=$a('aiTestMsg');
     btn.disabled=true; btn.textContent='测试中…';
+    if(msg){ msg.textContent=''; msg.className='ait-hintline'; }
     try{
       const key=c.mode==='direct'?($a('aiKey').value.trim()||getKey()):'';
       await request(c,{model:c.model,messages:[{role:'user',content:'请回复 ok'}],stream:false,max_tokens:5},null,null,{key:key,token:$a('aiProxyToken').value.trim()});
+      if(msg){ msg.textContent='连接成功：'+c.model+' 可用，可以开始提问了。'; msg.className='ait-hintline ok'; }
       toast('连接成功，可以开始提问了');
     }catch(e){
-      toast(mapError(e).text,false);
+      const m=mapError(e);
+      const detail=m.text+((m.detail&&m.code!=='model')?'（服务端原文：'+m.detail.slice(0,140)+'）':'');
+      if(msg){ msg.textContent=detail; msg.className='ait-hintline err'; }
+      toast(m.text,false);
     }finally{
       btn.disabled=false; btn.textContent=old;
     }
@@ -7255,6 +6949,11 @@ const AIT = (()=>{
     if(act==='rmatt'){ removeAtt(Number(t.dataset.i)); return; }
     if(act==='copy'){ copyMsg(t.dataset.mid); return; }
     if(act==='retry'){ retry(t.dataset.mid); return; }
+    if(act==='fixmodel'){
+      const msg=threadOf(subject()).messages.find(x=>x.id===t.dataset.mid);
+      openSettings({focusModel:true,suggests:(msg&&msg.error&&msg.error.modelList)||[]});
+      return;
+    }
     if(act==='cite'){
       const host=t.closest('.ait-msg'); if(!host) return;
       const mid=t.dataset.mid, i=Number(t.dataset.i);
@@ -7288,6 +6987,18 @@ const AIT = (()=>{
     $a('aiPreset').addEventListener('change',()=>{
       const p=PRESETS[$a('aiPreset').value];
       if(p&&p.base){ $a('aiBaseUrl').value=p.base; $a('aiModel').value=p.model; }
+      syncModelHint();
+    });
+    $a('aiModel').addEventListener('input',()=>{
+      const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
+      syncModelHint();
+    });
+    $a('aiModelPick').addEventListener('click',e=>{
+      const b=e.target.closest('button[data-model]'); if(!b) return;
+      $a('aiModel').value=b.dataset.model;
+      const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
+      syncModelHint();
+      $a('aiModel').focus();
     });
     $a('aiSubject').addEventListener('change',e=>switchSubject(e.target.value));
     $a('aiBody').addEventListener('click',onPanelClick);
