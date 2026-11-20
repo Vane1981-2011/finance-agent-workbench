@@ -1603,7 +1603,7 @@ body.ait-lock{overflow:hidden}
       </div>
       <div class="ait-field">
         <label>模型</label>
-        <input class="input" id="aiModel" placeholder="deepseek-chat" autocomplete="off" list="aiModelList" spellcheck="false">
+        <input class="input" id="aiModel" placeholder="deepseek-flash" autocomplete="off" list="aiModelList" spellcheck="false">
         <datalist id="aiModelList"></datalist>
         <div class="ait-modelpicks" id="aiModelPick" hidden></div>
         <div class="ait-hintline" id="aiModelHint"></div>
@@ -5479,20 +5479,20 @@ const AIT = (()=>{
   const LIMITS={files:3,fileMB:10,chars:12000,msgChars:16000,history:12,msgs:40,timeout:90000,
     tpl:8000,maxTokens:2048,tempMax:2,dailyMax:200,pinFails:5,pinLock:60000};
   const PRESETS={
-    deepseek:{base:'https://api.deepseek.com',model:'deepseek-chat'},
+    deepseek:{base:'https://api.deepseek.com',model:'deepseek-flash'},
     moonshot:{base:'https://api.moonshot.cn/v1',model:'moonshot-v1-8k'},
     siliconflow:{base:'https://api.siliconflow.cn/v1',model:'deepseek-ai/DeepSeek-V3'},
     custom:{base:'',model:''}
   };
   /* 仅作输入提示，不做白名单：第三方兼容网关可自由填写 */
   const MODEL_SUGGEST={
-    deepseek:['deepseek-chat','deepseek-reasoner'],
+    deepseek:['deepseek-flash','deepseek-v4-pro','deepseek-v4-flash'],
     moonshot:['moonshot-v1-8k','moonshot-v1-32k'],
     siliconflow:['deepseek-ai/DeepSeek-V3','Qwen/Qwen2.5-72B-Instruct'],
     custom:[]
   };
   const MODEL_HINT={
-    deepseek:'DeepSeek 官方常用：deepseek-chat（通用）/ deepseek-reasoner（推理）；第三方兼容网关请按其控制台「可用模型」填写。',
+    deepseek:'DeepSeek 官方接口 ID：deepseek-flash（即 V4.1-Flash 版本）/ deepseek-v4-pro（推理）。模型版本名不是接口 ID；第三方兼容网关请按其控制台「可用模型」填写。',
     moonshot:'Moonshot 常用：moonshot-v1-8k / moonshot-v1-32k；以控制台可用列表为准。',
     siliconflow:'SiliconFlow 模型名通常带厂商前缀，如 deepseek-ai/DeepSeek-V3；以控制台为准。',
     custom:'填写服务商文档里的模型 ID；名称区分大小写，不能含空格。'
@@ -5682,6 +5682,13 @@ const AIT = (()=>{
     if(!b) return '';
     if(c.mode==='proxy') return /\/chat(\/completions)?$/.test(b)?b:b+'/chat';
     return /\/chat\/completions$/.test(b)?b:b+'/chat/completions';
+  }
+  /* 部分兼容网关只认 /v1/chat/completions；仅在 404 时回退一次 */
+  function endpointAlt(c){
+    if(!c||c.mode!=='direct') return '';
+    const b=String(c.baseUrl||'').trim().replace(/\/+$/,'');
+    if(!b||/\/chat\/completions$/.test(b)||/\/v\d+(\.\d+)?$/.test(b)) return '';
+    return b+'/v1/chat/completions';
   }
   function configured(){
     if(!cfg||!cfg.baseUrl||!cfg.model) return false;
@@ -6268,7 +6275,8 @@ const AIT = (()=>{
     if(m.status==='done'&&m.content) act=`<div class="ait-actions"><button type="button" data-ait="copy" data-mid="${esc(m.id)}">复制</button></div>`;
     else if(m.status==='error'||(m.status==='stopped'&&!m.content)){
       const fix=m.error&&m.error.code==='model';
-      act=`<div class="ait-actions">${fix?`<button type="button" data-ait="fixmodel" data-mid="${esc(m.id)}">改模型</button>`:''}<button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
+      const fixBase=m.error&&m.error.code==='notfound';
+      act=`<div class="ait-actions">${fix?`<button type="button" data-ait="fixmodel" data-mid="${esc(m.id)}">改模型</button>`:''}${fixBase?`<button type="button" data-ait="fixbase" data-mid="${esc(m.id)}">改接口地址</button>`:''}<button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
     }
     else if(m.status==='stopped'&&m.content) act=`<div class="ait-actions"><button type="button" data-ait="copy" data-mid="${esc(m.id)}">复制</button><button type="button" data-ait="retry" data-mid="${esc(m.id)}">重新生成</button></div>`;
     return `<div class="ait-msg ai" data-mid="${esc(m.id)}"><div class="ait-av">师</div><div class="ait-bubble"><div class="ait-stream">${body}</div>${err}${stop}${cites}${act}</div></div>`;
@@ -6443,7 +6451,7 @@ const AIT = (()=>{
     let text='模型名称无效：'+(bad?'当前「'+bad+'」':'当前填写的模型名')+'不被服务端支持。';
     if(list.length) text+='服务端可用模型：'+list.join(' / ')+'。';
     text+='请打开「模型设置」把「模型」改成'+(list.length?'上面列出的名称':'服务商控制台里的模型名')
-      +(list.length?'':'（DeepSeek 官方可先用 deepseek-chat）')+'，保存后再重试。';
+      +(list.length?'':'（DeepSeek 官方可先用 deepseek-flash）')+'，保存后再重试。';
     return {code:'model',text:text,modelList:list,detail:raw.slice(0,300)};
   }
   function mapError(e){
@@ -6451,7 +6459,14 @@ const AIT = (()=>{
     const raw=String((e&&e.message)||'');
     if(isModelError(raw)) return modelError(e);
     if(st===401||st===403) return {code:'auth',text:'密钥无效或无权限：请在「模型设置」里检查 API Key 是否填对（前后不要有空格），并确认账户已开通该模型',detail:raw.slice(0,200)};
-    if(st===404) return {code:'notfound',text:'接口地址或模型名称不正确（404）：DeepSeek 官方地址为 https://api.deepseek.com，请同时核对模型名',detail:raw.slice(0,200)};
+    if(st===404){
+      const u=String((e&&e.requestUrl)||'');
+      let text='接口地址或模型名称不正确（404）。';
+      if(u) text+='实际请求地址：'+u+'。';
+      if(raw) text+='服务端返回：'+raw.slice(0,140)+'。';
+      text+='DeepSeek 官方地址填 https://api.deepseek.com 即可，系统会自动再试一次 /v1；若仍 404，请核对服务商要求的路径';
+      return {code:'notfound',text:text,detail:raw.slice(0,200),requestUrl:u};
+    }
     if(st===429) return {code:'limit',text:'请求过于频繁或额度不足，请稍后再试'};
     if(st>=500) return {code:'server',text:'模型服务暂时不可用，请稍后重试'};
     if(st===400||st===422) return {code:'badreq',text:'请求被服务端拒绝（'+st+'）'+(raw?'：'+raw.slice(0,160):'')+'。请检查模型名称、接口地址和参数',detail:raw.slice(0,200)};
@@ -6465,13 +6480,25 @@ const AIT = (()=>{
     const headers={'Content-Type':'application/json'};
     if(c.mode==='direct'){ const k=extra.key!==undefined?extra.key:getKey(); if(k) headers['Authorization']='Bearer '+k; }
     else { const tk=extra.token!==undefined?extra.token:getToken(); if(tk) headers['Authorization']='Bearer '+tk; }
-    const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(payload),signal:signal||undefined});
+    const body=JSON.stringify(payload);
+    let useUrl=url;
+    let res=await fetch(useUrl,{method:'POST',headers,body:body,signal:signal||undefined});
+    /* 只认 /v1/chat/completions 的服务端：404 时回退一次（404 不计费，也不会掩盖 401/429 等其他错误） */
+    if(res.status===404){
+      const alt=endpointAlt(c);
+      if(alt&&alt!==url){
+        useUrl=alt;
+        res=await fetch(useUrl,{method:'POST',headers,body:body,signal:signal||undefined});
+      }
+    }
     if(!res.ok){
       let detail='';
       try{ const j=await res.json(); detail=(j&&j.error&&(j.error.message||j.error))||j.message||''; }catch(e){}
       const err=new Error(detail||('HTTP '+res.status));
       err.status=res.status;
       err.model=(payload&&payload.model)||'';
+      err.requestUrl=useUrl;
+      err.baseUrl=String(c.baseUrl||'');
       throw err;
     }
     const ct=(res.headers.get('content-type')||'').toLowerCase();
@@ -6670,6 +6697,7 @@ const AIT = (()=>{
 
   /* ---------- 设置 ---------- */
   let pendingModelFocus=false;
+  let pendingBaseFocus=false;
   let modelSuggests=[];
   function focusModel(){
     pendingModelFocus=false;
@@ -6678,6 +6706,17 @@ const AIT = (()=>{
     el.focus();
     try{ el.select(); }catch(e){}
   }
+  function focusBase(){
+    pendingBaseFocus=false;
+    const el=$a('aiBaseUrl'); if(!el) return;
+    try{ el.scrollIntoView({block:'center'}); }catch(e){}
+    el.focus();
+    try{ el.select(); }catch(e){}
+  }
+  function resumePendingFocus(){
+    if(pendingModelFocus) setTimeout(focusModel,60);
+    else if(pendingBaseFocus) setTimeout(focusBase,60);
+  }
   function openSettings(opts){
     opts=opts||{};
     modelSuggests=Array.isArray(opts.suggests)?opts.suggests.filter(Boolean).slice(0,6):[];
@@ -6685,9 +6724,10 @@ const AIT = (()=>{
     syncModelHint();
     $a('aiSettings').classList.add('open');
     if(opts.focusModel) pendingModelFocus=true;
+    if(opts.focusBase) pendingBaseFocus=true;
     if(pinReady()&&!pinOk){ openPinGate(); return; }
     closePinGate();
-    if(pendingModelFocus) setTimeout(focusModel,60);
+    resumePendingFocus();
   }
   function closeSettings(){
     closePinGate();
@@ -6723,7 +6763,7 @@ const AIT = (()=>{
       pinOk=true; pinFails=0;
       if(inp) inp.value=''; if(msg) msg.textContent='';
       closePinGate(); if(msg) msg.classList.remove('warn'); render();
-      if(pendingModelFocus) setTimeout(focusModel,60);
+      resumePendingFocus();
       return;
     }
     pinFails++;
@@ -6756,9 +6796,10 @@ const AIT = (()=>{
       pick.innerHTML=list.map(m=>`<button type="button" data-model="${esc(m)}">用 ${esc(m)}</button>`).join('');
       pick.hidden=!list.length;
     }
-    if(preset==='deepseek'&&model&&known.indexOf(model)<0){
-      el.textContent='当前「'+model+'」不是 DeepSeek 官方常用模型名。若使用第三方兼容网关，以服务商控制台「可用模型」为准；否则请改成 deepseek-chat。';
-      el.classList.add('warn');
+    if(model&&known.length&&known.indexOf(model)<0){
+      el.textContent='提示：当前「'+model+'」不在内置常用列表（列表可能滞后）。'+(preset==='deepseek'?'DeepSeek 官方接口 ID 为 deepseek-flash（V4.1-Flash）/ deepseek-v4-pro；':'')
+        +'若服务商控制台支持该名称可直接保存，否则请按其「可用模型」填写。';
+      el.classList.remove('warn');
       return;
     }
     el.textContent=MODEL_HINT[preset]||MODEL_HINT.custom;
@@ -6954,6 +6995,7 @@ const AIT = (()=>{
       openSettings({focusModel:true,suggests:(msg&&msg.error&&msg.error.modelList)||[]});
       return;
     }
+    if(act==='fixbase'){ openSettings({focusBase:true}); return; }
     if(act==='cite'){
       const host=t.closest('.ait-msg'); if(!host) return;
       const mid=t.dataset.mid, i=Number(t.dataset.i);
