@@ -1321,7 +1321,6 @@ body.ait-lock{overflow:hidden}
   @page{size:A4;margin:16mm 14mm}
 }
 </style>
-<meta name="robots" content="noindex,nofollow">
 </head>
 <body>
 <header class="topbar">
@@ -6999,6 +6998,7 @@ const AIT = (()=>{
       const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
       syncModelHint();
       $a('aiModel').focus();
+      toast('已填入 '+b.dataset.model+'，请点「保存设置」');
     });
     $a('aiSubject').addEventListener('change',e=>switchSubject(e.target.value));
     $a('aiBody').addEventListener('click',onPanelClick);
