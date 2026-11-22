@@ -1214,6 +1214,10 @@ body.ait-lock{overflow:hidden}
 .ait-note{margin:12px 0;font-size:9.5px;color:#9aa08f;line-height:1.7;background:#f6f4ec;border:1px solid #ece9de;border-radius:9px;padding:9px 10px}
 .ait-settings-actions{display:flex;gap:8px;margin-top:14px}
 .ait-settings-actions .btn{flex:1}
+.ait-fixrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ait-fixrow[hidden]{display:none}
+.ait-fixrow .btn{flex:none;font-size:10.5px;padding:5px 12px}
+.ait-fixrow .btn[hidden]{display:none}
 .ait-settings-extra{margin-top:16px;text-align:center}
 .ait-link{font-size:10px;color:#a4695f;border-bottom:1px solid #e3c9c4;padding-bottom:1px}
 .ait-group{margin:0 0 15px;padding-top:14px;border-top:1px dashed #e9e6da}
@@ -1587,6 +1591,7 @@ body.ait-lock{overflow:hidden}
           <button type="button" data-mode="direct" class="on">浏览器直连</button>
           <button type="button" data-mode="proxy">代理地址</button>
         </div>
+        <div class="ait-hintline warn" id="aiModeWarn" hidden>当前接入方式是「代理地址」，但接口地址填的是服务商官方地址。官方地址不能当代理用，请改选「浏览器直连」。</div>
       </div>
       <div class="ait-field">
         <label>服务商</label>
@@ -1650,6 +1655,10 @@ body.ait-lock{overflow:hidden}
         <button class="btn primary" id="aiSaveBtn" type="button">保存设置</button>
       </div>
       <div class="ait-hintline" id="aiTestMsg" role="status" aria-live="polite"></div>
+      <div class="ait-fixrow" id="aiFixRow" hidden>
+        <button class="btn soft sm" id="aiFixDirect" type="button">改用浏览器直连</button>
+        <button class="btn soft sm" id="aiFixBase" type="button">改接口地址</button>
+      </div>
       <div class="ait-settings-extra">
         <button class="ait-link" id="aiClearAll" type="button">清空全部对话</button>
       </div>
@@ -6793,6 +6802,36 @@ const AIT = (()=>{
       msg.textContent='口令不正确，还可尝试 '+(LIMITS.pinFails-pinFails)+' 次';
     }
   }
+  function officialProviderBase(url){
+    return /^https?:\/\/(api\.deepseek\.com|api\.moonshot\.cn|api\.siliconflow\.cn)(\/|$)/i.test(String(url||'').trim());
+  }
+  function hideFixRow(){ const r=$a('aiFixRow'); if(r) r.hidden=true; }
+  function showFixRow(kind){
+    const r=$a('aiFixRow'); if(!r){ return; }
+    const d=$a('aiFixDirect'), b=$a('aiFixBase');
+    if(d) d.hidden=kind!=='direct';
+    if(b) b.hidden=kind!=='base';
+    r.hidden=!kind;
+  }
+  function syncModeWarn(){
+    const w=$a('aiModeWarn'); if(!w) return;
+    const mode=$a('aiModeSeg').querySelector('button.on').dataset.mode;
+    w.hidden=SHARE_MODE||mode!=='proxy'||!officialProviderBase($a('aiBaseUrl').value);
+  }
+  function switchToDirectInSettings(){
+    $a('aiModeSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='direct'));
+    const tk=String($a('aiProxyToken').value||getToken()||'').trim();
+    if(/^sk-[A-Za-z0-9_-]{8,}$/.test(tk)&&!$a('aiKey').value.trim()){
+      $a('aiKey').value=tk;
+      $a('aiProxyToken').value='';
+      setToken('');
+    }
+    cfg.mode='direct'; saveCfg();
+    syncMode(); syncModelHint(); render(); hideFixRow();
+    const msg=$a('aiTestMsg');
+    if(msg){ msg.textContent='已切换为「浏览器直连」。请在下方填写 API Key（sk-…），再点「测试连接」。'; msg.className='ait-hintline'; }
+    setTimeout(focusKeyInput,60);
+  }
   function syncMode(){
     const mode=$a('aiModeSeg').querySelector('button.on').dataset.mode;
     $a('aiKeyField').style.display=(mode==='direct'&&!SHARE_MODE)?'':'none';
@@ -6801,6 +6840,7 @@ const AIT = (()=>{
       $a('aiModeSeg').style.display='none';
       $a('aiModeSeg').querySelectorAll('button').forEach(b=>{ b.disabled=b.dataset.mode==='direct'; });
     }
+    syncModeWarn();
   }
   function syncModelHint(){
     const el=$a('aiModelHint'); if(!el) return;
@@ -6837,6 +6877,7 @@ const AIT = (()=>{
     $a('aiBaseUrl').value=cfg.baseUrl||'';
     $a('aiModel').value=cfg.model||'';
     const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
+    hideFixRow();
     syncModelHint();
     $a('aiRemember').checked=!!cfg.keyRemember;
     $a('aiKey').value=getKey();
@@ -6919,11 +6960,13 @@ const AIT = (()=>{
       const key=c.mode==='direct'?($a('aiKey').value.trim()||getKey()):'';
       await request(c,{model:c.model,messages:[{role:'user',content:'请回复 ok'}],stream:false,max_tokens:5},null,null,{key:key,token:$a('aiProxyToken').value.trim()});
       if(msg){ msg.textContent='连接成功：'+c.model+' 可用，可以开始提问了。'; msg.className='ait-hintline ok'; }
+      hideFixRow();
       toast('连接成功，可以开始提问了');
     }catch(e){
       const m=mapError(e);
       const detail=m.text+((m.detail&&m.code!=='model')?'（服务端原文：'+m.detail.slice(0,140)+'）':'');
       if(msg){ msg.textContent=detail; msg.className='ait-hintline err'; }
+      if(m.code==='notfound') showFixRow(m.mode==='proxy'?'direct':'base'); else hideFixRow();
       toast(m.text,false);
     }finally{
       btn.disabled=false; btn.textContent=old;
@@ -7049,18 +7092,23 @@ const AIT = (()=>{
     $a('aiClearAll').addEventListener('click',clearAll);
     $a('aiSaveBtn').addEventListener('click',saveSettings);
     $a('aiTestBtn').addEventListener('click',testConnection);
+    $a('aiFixDirect').addEventListener('click',switchToDirectInSettings);
+    $a('aiFixBase').addEventListener('click',()=>{ hideFixRow(); focusBase(); });
     $a('aiModeSeg').addEventListener('click',e=>{
       const b=e.target.closest('button[data-mode]'); if(!b) return;
       $a('aiModeSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-      syncMode();
+      hideFixRow(); syncMode();
     });
     $a('aiPreset').addEventListener('change',()=>{
       const p=PRESETS[$a('aiPreset').value];
       if(p&&p.base){ $a('aiBaseUrl').value=p.base; $a('aiModel').value=p.model; }
+      hideFixRow(); syncModeWarn();
       syncModelHint();
     });
+    $a('aiBaseUrl').addEventListener('input',()=>{ hideFixRow(); syncModeWarn(); });
     $a('aiModel').addEventListener('input',()=>{
       const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
+      hideFixRow();
       syncModelHint();
     });
     $a('aiModelPick').addEventListener('click',e=>{
