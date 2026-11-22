@@ -6476,7 +6476,7 @@ const AIT = (()=>{
         let t='接口地址或模型名称不正确（404）。';
         if(u) t+='实际请求地址：'+u+'。';
         if(raw) t+='服务端返回：'+raw.slice(0,140)+'。';
-        t+='当前接入方式是「代理地址」，请求被拼成了 '+(u||'代理地址 + /chat')+'；如果你填的是服务商官方地址（如 https://api.deepseek.com），请点下面的「改用浏览器直连」，把 Key 填到「API 密钥」里';
+        t+='当前接入方式是「代理地址」，请求被拼成了 '+(u||'代理地址 + /chat')+'；如果你填的是服务商官方地址（如 https://api.deepseek.com），请点下面的「改用浏览器直连」，把 Key 填到「API Key」里';
         return {code:'notfound',text:t,detail:raw.slice(0,200),requestUrl:u,mode:'proxy'};
       }
       let text='接口地址或模型名称不正确（404）。';
@@ -6967,7 +6967,7 @@ const AIT = (()=>{
       const detail=m.text+((m.detail&&m.code!=='model')?'（服务端原文：'+m.detail.slice(0,140)+'）':'');
       if(msg){ msg.textContent=detail; msg.className='ait-hintline err'; }
       if(m.code==='notfound') showFixRow(m.mode==='proxy'?'direct':'base'); else hideFixRow();
-      toast(m.text,false);
+      toast('连接失败：请查看下方提示后重试',false);
     }finally{
       btn.disabled=false; btn.textContent=old;
     }
