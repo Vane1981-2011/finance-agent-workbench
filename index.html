@@ -6829,7 +6829,7 @@ const AIT = (()=>{
     cfg.mode='direct'; saveCfg();
     syncMode(); syncModelHint(); render(); hideFixRow();
     const msg=$a('aiTestMsg');
-    if(msg){ msg.textContent='已切换为「浏览器直连」。请在下方填写 API Key（sk-…），再点「测试连接」。'; msg.className='ait-hintline'; }
+    if(msg){ msg.textContent='已切换为「浏览器直连」。请填写 API Key（sk-…），点「测试连接」成功后记得「保存设置」。'; msg.className='ait-hintline'; }
     setTimeout(focusKeyInput,60);
   }
   function syncMode(){
