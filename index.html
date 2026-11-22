@@ -5521,6 +5521,7 @@ const AIT = (()=>{
   const ICON_STOP='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
   let chat=loadChat();
+  let cfgAutoFixed=false;
   let cfg=loadCfg();
   let sending=false, ctl=null, timedOut=false, rafId=0, streamMsg=null, lastFocus=null, curSubj='';
   let ctxState=null, pinOk=false, pinFails=0, pinLockUntil=0, pinTimer=0;
@@ -5560,6 +5561,23 @@ const AIT = (()=>{
       pinHash:'',pinSalt:'',pinMode:''
     };
   }
+  /* 官方地址不可能是代理端点：历史误配会导致 /chat 404，加载时直接纠正为浏览器直连 */
+  function migrateProxyOfficial(c){
+    if(SHARE_MODE||!c||c.mode!=='proxy'||!officialProviderBase(c.baseUrl)) return false;
+    c.mode='direct';
+    let key='',tk='';
+    try{ key=sessionStorage.getItem(LS_KEY)||localStorage.getItem(LS_KEY)||''; }catch(e){}
+    try{ tk=sessionStorage.getItem(PS_TOKEN)||''; }catch(e){}
+    if(!key&&/^sk-[A-Za-z0-9_-]{8,}$/.test(String(tk||''))){
+      try{
+        if(c.keyRemember) localStorage.setItem(LS_KEY,tk); else sessionStorage.setItem(LS_KEY,tk);
+        sessionStorage.removeItem(PS_TOKEN);
+      }catch(e){}
+    }
+    try{ localStorage.setItem(LS_CFG,JSON.stringify(c)); }catch(e){}
+    cfgAutoFixed=true;
+    return true;
+  }
   function loadCfg(){
     const def=cfgDefaults();
     let j=null;
@@ -5584,6 +5602,7 @@ const AIT = (()=>{
     c.pinSalt=String(c.pinSalt||'');
     c.pinMode=String(c.pinMode||'');
     if(c.mode!=='proxy') c.mode='direct';
+    migrateProxyOfficial(c);
     if(SHARE_MODE) c.mode='proxy';
     return c;
   }
@@ -6285,7 +6304,7 @@ const AIT = (()=>{
     else if(m.status==='error'||(m.status==='stopped'&&!m.content)){
       const fix=m.error&&m.error.code==='model';
       const fixBase=m.error&&m.error.code==='notfound';
-      const toDirect=m.error&&m.error.code==='notfound'&&m.error.mode==='proxy';
+      const toDirect=m.error&&m.error.code==='notfound'&&m.error.mode==='proxy'&&!SHARE_MODE;
       act=`<div class="ait-actions">${fix?`<button type="button" data-ait="fixmodel" data-mid="${esc(m.id)}">改模型</button>`:''}${toDirect?`<button type="button" data-ait="usedirect" data-mid="${esc(m.id)}">改用浏览器直连</button>`:''}${fixBase?`<button type="button" data-ait="fixbase" data-mid="${esc(m.id)}">改接口地址</button>`:''}<button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
     }
     else if(m.status==='stopped'&&m.content) act=`<div class="ait-actions"><button type="button" data-ait="copy" data-mid="${esc(m.id)}">复制</button><button type="button" data-ait="retry" data-mid="${esc(m.id)}">重新生成</button></div>`;
@@ -6464,18 +6483,23 @@ const AIT = (()=>{
       +(list.length?'':'（DeepSeek 官方可先用 deepseek-flash）')+'，保存后再重试。';
     return {code:'model',text:text,modelList:list,detail:raw.slice(0,300)};
   }
-  function mapError(e){
+  function mapError(e,useCfg){
     const st=e&&e.status;
     const raw=String((e&&e.message)||'');
+    const cur=useCfg||cfg;
     if(isModelError(raw)) return modelError(e);
     if(st===401||st===403) return {code:'auth',text:'密钥无效或无权限：请在「模型设置」里检查 API Key 是否填对（前后不要有空格），并确认账户已开通该模型',detail:raw.slice(0,200)};
     if(st===404){
       const u=String((e&&e.requestUrl)||'');
-      const isProxy=cfg&&cfg.mode==='proxy';
+      const isProxy=cur&&cur.mode==='proxy';
       if(isProxy){
         let t='接口地址或模型名称不正确（404）。';
         if(u) t+='实际请求地址：'+u+'。';
         if(raw) t+='服务端返回：'+raw.slice(0,140)+'。';
+        if(SHARE_MODE){
+          t+='当前是校内试用分享版，只能填写老师提供的代理地址和代理口令，不能直连服务商。请向老师确认代理地址（客户端会自动拼 /chat）。';
+          return {code:'notfound',text:t,detail:raw.slice(0,200),requestUrl:u,mode:'proxy',share:true};
+        }
         t+='当前接入方式是「代理地址」，请求被拼成了 '+(u||'代理地址 + /chat')+'；如果你填的是服务商官方地址（如 https://api.deepseek.com），请点下面的「改用浏览器直连」，把 Key 填到「API Key」里';
         return {code:'notfound',text:t,detail:raw.slice(0,200),requestUrl:u,mode:'proxy'};
       }
@@ -6819,6 +6843,7 @@ const AIT = (()=>{
     w.hidden=SHARE_MODE||mode!=='proxy'||!officialProviderBase($a('aiBaseUrl').value);
   }
   function switchToDirectInSettings(){
+    if(SHARE_MODE){ toast('校内试用分享版只能使用代理地址',false); return; }
     $a('aiModeSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.mode==='direct'));
     const tk=String($a('aiProxyToken').value||getToken()||'').trim();
     if(/^sk-[A-Za-z0-9_-]{8,}$/.test(tk)&&!$a('aiKey').value.trim()){
@@ -6878,6 +6903,10 @@ const AIT = (()=>{
     $a('aiModel').value=cfg.model||'';
     const tm=$a('aiTestMsg'); if(tm){ tm.textContent=''; tm.className='ait-hintline'; }
     hideFixRow();
+    if(cfgAutoFixed&&tm){
+      tm.textContent='已自动把接入方式从「代理地址」改为「浏览器直连」：官方地址不能当作代理用。请确认 API Key 后点「测试连接」，成功后记得「保存设置」。';
+      tm.className='ait-hintline';
+    }
     syncModelHint();
     $a('aiRemember').checked=!!cfg.keyRemember;
     $a('aiKey').value=getKey();
@@ -6949,6 +6978,7 @@ const AIT = (()=>{
       else setKey('',false);
     }
     setToken($a('aiProxyToken').value.trim());
+    cfgAutoFixed=false;
     closeSettings(); render(); toast('模型设置已保存');
   }
   async function testConnection(){
@@ -6960,13 +6990,14 @@ const AIT = (()=>{
       const key=c.mode==='direct'?($a('aiKey').value.trim()||getKey()):'';
       await request(c,{model:c.model,messages:[{role:'user',content:'请回复 ok'}],stream:false,max_tokens:5},null,null,{key:key,token:$a('aiProxyToken').value.trim()});
       if(msg){ msg.textContent='连接成功：'+c.model+' 可用，可以开始提问了。'; msg.className='ait-hintline ok'; }
+      cfgAutoFixed=false;
       hideFixRow();
       toast('连接成功，可以开始提问了');
     }catch(e){
-      const m=mapError(e);
+      const m=mapError(e,c);
       const detail=m.text+((m.detail&&m.code!=='model')?'（服务端原文：'+m.detail.slice(0,140)+'）':'');
       if(msg){ msg.textContent=detail; msg.className='ait-hintline err'; }
-      if(m.code==='notfound') showFixRow(m.mode==='proxy'?'direct':'base'); else hideFixRow();
+      if(m.code==='notfound') showFixRow((m.mode==='proxy'&&!SHARE_MODE)?'direct':'base'); else hideFixRow();
       toast('连接失败：请查看下方提示后重试',false);
     }finally{
       btn.disabled=false; btn.textContent=old;
