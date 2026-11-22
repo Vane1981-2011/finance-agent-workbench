@@ -6276,7 +6276,8 @@ const AIT = (()=>{
     else if(m.status==='error'||(m.status==='stopped'&&!m.content)){
       const fix=m.error&&m.error.code==='model';
       const fixBase=m.error&&m.error.code==='notfound';
-      act=`<div class="ait-actions">${fix?`<button type="button" data-ait="fixmodel" data-mid="${esc(m.id)}">改模型</button>`:''}${fixBase?`<button type="button" data-ait="fixbase" data-mid="${esc(m.id)}">改接口地址</button>`:''}<button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
+      const toDirect=m.error&&m.error.code==='notfound'&&m.error.mode==='proxy';
+      act=`<div class="ait-actions">${fix?`<button type="button" data-ait="fixmodel" data-mid="${esc(m.id)}">改模型</button>`:''}${toDirect?`<button type="button" data-ait="usedirect" data-mid="${esc(m.id)}">改用浏览器直连</button>`:''}${fixBase?`<button type="button" data-ait="fixbase" data-mid="${esc(m.id)}">改接口地址</button>`:''}<button type="button" data-ait="retry" data-mid="${esc(m.id)}">重试</button></div>`;
     }
     else if(m.status==='stopped'&&m.content) act=`<div class="ait-actions"><button type="button" data-ait="copy" data-mid="${esc(m.id)}">复制</button><button type="button" data-ait="retry" data-mid="${esc(m.id)}">重新生成</button></div>`;
     return `<div class="ait-msg ai" data-mid="${esc(m.id)}"><div class="ait-av">师</div><div class="ait-bubble"><div class="ait-stream">${body}</div>${err}${stop}${cites}${act}</div></div>`;
@@ -6461,11 +6462,19 @@ const AIT = (()=>{
     if(st===401||st===403) return {code:'auth',text:'密钥无效或无权限：请在「模型设置」里检查 API Key 是否填对（前后不要有空格），并确认账户已开通该模型',detail:raw.slice(0,200)};
     if(st===404){
       const u=String((e&&e.requestUrl)||'');
+      const isProxy=cfg&&cfg.mode==='proxy';
+      if(isProxy){
+        let t='接口地址或模型名称不正确（404）。';
+        if(u) t+='实际请求地址：'+u+'。';
+        if(raw) t+='服务端返回：'+raw.slice(0,140)+'。';
+        t+='当前接入方式是「代理地址」，请求被拼成了 '+(u||'代理地址 + /chat')+'；如果你填的是服务商官方地址（如 https://api.deepseek.com），请点下面的「改用浏览器直连」，把 Key 填到「API 密钥」里';
+        return {code:'notfound',text:t,detail:raw.slice(0,200),requestUrl:u,mode:'proxy'};
+      }
       let text='接口地址或模型名称不正确（404）。';
       if(u) text+='实际请求地址：'+u+'。';
       if(raw) text+='服务端返回：'+raw.slice(0,140)+'。';
       text+='DeepSeek 官方地址填 https://api.deepseek.com 即可，系统会自动再试一次 /v1；若仍 404，请核对服务商要求的路径';
-      return {code:'notfound',text:text,detail:raw.slice(0,200),requestUrl:u};
+      return {code:'notfound',text:text,detail:raw.slice(0,200),requestUrl:u,mode:'direct'};
     }
     if(st===429) return {code:'limit',text:'请求过于频繁或额度不足，请稍后再试'};
     if(st>=500) return {code:'server',text:'模型服务暂时不可用，请稍后重试'};
@@ -6698,6 +6707,8 @@ const AIT = (()=>{
   /* ---------- 设置 ---------- */
   let pendingModelFocus=false;
   let pendingBaseFocus=false;
+  let pendingKeyFocus=false;
+  let keyPrefill='';
   let modelSuggests=[];
   function focusModel(){
     pendingModelFocus=false;
@@ -6713,9 +6724,16 @@ const AIT = (()=>{
     el.focus();
     try{ el.select(); }catch(e){}
   }
+  function focusKeyInput(){
+    pendingKeyFocus=false;
+    const el=$a('aiKey'); if(!el) return;
+    try{ el.scrollIntoView({block:'center'}); }catch(e){}
+    el.focus();
+  }
   function resumePendingFocus(){
     if(pendingModelFocus) setTimeout(focusModel,60);
     else if(pendingBaseFocus) setTimeout(focusBase,60);
+    else if(pendingKeyFocus) setTimeout(focusKeyInput,60);
   }
   function openSettings(opts){
     opts=opts||{};
@@ -6725,6 +6743,7 @@ const AIT = (()=>{
     $a('aiSettings').classList.add('open');
     if(opts.focusModel) pendingModelFocus=true;
     if(opts.focusBase) pendingBaseFocus=true;
+    if(opts.focusKey) pendingKeyFocus=true;
     if(pinReady()&&!pinOk){ openPinGate(); return; }
     closePinGate();
     resumePendingFocus();
@@ -6821,6 +6840,7 @@ const AIT = (()=>{
     syncModelHint();
     $a('aiRemember').checked=!!cfg.keyRemember;
     $a('aiKey').value=getKey();
+    if(!$a('aiKey').value&&keyPrefill){ $a('aiKey').value=keyPrefill; keyPrefill=''; }
     $a('aiProxyToken').value=getToken();
     $a('aiEnabled').checked=!!cfg.enabled;
     $a('aiEnabledTxt').textContent=cfg.enabled?'已开启':'已关闭';
@@ -6996,6 +7016,14 @@ const AIT = (()=>{
       return;
     }
     if(act==='fixbase'){ openSettings({focusBase:true}); return; }
+    if(act==='usedirect'){
+      const tk=getToken();
+      if(tk&&/^sk-[A-Za-z0-9_-]{8,}$/.test(tk)&&!getKey()) keyPrefill=tk;
+      cfg.mode='direct'; saveCfg(); render();
+      openSettings({focusKey:true});
+      toast('已改为浏览器直连，请确认 API 密钥后点「测试连接」');
+      return;
+    }
     if(act==='cite'){
       const host=t.closest('.ait-msg'); if(!host) return;
       const mid=t.dataset.mid, i=Number(t.dataset.i);
